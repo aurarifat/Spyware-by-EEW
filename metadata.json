@@ -1,0 +1,11 @@
+{
+  "name": "FamilyConnect - Family Device Safety & Management",
+  "description": "Transparent, consent-based, secure Android-first family device management and safety application with verified permissions, live camera/screen sharing, real-time audit logging, and member privacy controls.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation",
+    "display-capture"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

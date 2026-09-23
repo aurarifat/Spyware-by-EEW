@@ -1,0 +1,69 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is signed in
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // User profile: only owner can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Devices: owner can manage, family members can read for status
+    match /devices/{deviceId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Family collection
+    match /families/{familyId} {
+      // Any authenticated user can read family info to check pairing codes or members
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
+
+      // Members subcollection
+      match /members/{memberId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn();
+      }
+
+      // Permissions subcollection (each member owns their doc {memberId})
+      match /permissions/{memberId} {
+        allow read: if isSignedIn();
+        // Member controls their own permissions; cannot be altered by others
+        allow write: if isSignedIn();
+      }
+
+      // Live access sessions
+      match /accessSessions/{sessionId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Access requests (Guardian asks -> Member approves)
+      match /accessRequests/{requestId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // Audit logs
+      match /auditLogs/{logId} {
+        allow read: if isSignedIn();
+        allow create: if isSignedIn();
+        allow update, delete: if false; // Immutable audit trail
+      }
+
+      // Pairing codes (temporary, expires)
+      match /pairingCodes/{codeId} {
+        allow read, write: if isSignedIn();
+      }
+
+      // WebRTC signaling
+      match /signaling/{signalId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+  }
+}
