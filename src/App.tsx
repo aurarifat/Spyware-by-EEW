@@ -34,6 +34,8 @@ export default function App() {
       if (snap.exists()) {
         setFamily(snap.data() as Family);
       }
+    }, (err) => {
+      console.warn('Family listener error:', err);
     });
 
     const membersCol = collection(db, 'families', profile.familyId, 'members');
@@ -56,8 +58,12 @@ export default function App() {
               setShowWizard(true);
             }
           }
+        }).catch(err => {
+          console.warn('Permissions getDoc error:', err);
         });
       }
+    }, (err) => {
+      console.warn('Members listener error:', err);
     });
 
     return () => {

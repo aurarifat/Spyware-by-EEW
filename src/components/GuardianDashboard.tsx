@@ -75,6 +75,8 @@ export const GuardianDashboard: React.FC<GuardianDashboardProps> = ({
       } else {
         setMemberPermissions(null);
       }
+    }, (err) => {
+      console.warn('Guardian perm listener warning:', err);
     });
 
     // Device Info listener
@@ -101,6 +103,8 @@ export const GuardianDashboard: React.FC<GuardianDashboardProps> = ({
           wifiSsid: 'Home Wi-Fi'
         });
       }
+    }, (err) => {
+      console.warn('Guardian dev listener warning:', err);
     });
 
     // Active session listener for this member
@@ -114,6 +118,8 @@ export const GuardianDashboard: React.FC<GuardianDashboardProps> = ({
         }
       });
       setActiveLiveSession(found);
+    }, (err) => {
+      console.warn('Guardian sessions listener warning:', err);
     });
 
     return () => {
@@ -134,6 +140,8 @@ export const GuardianDashboard: React.FC<GuardianDashboardProps> = ({
       snap.forEach(d => logs.push(d.data() as AuditLog));
       logs.sort((a, b) => b.timestamp - a.timestamp);
       setAuditLogs(logs);
+    }, (err) => {
+      console.warn('Guardian audit listener warning:', err);
     });
     return () => unsub();
   }, [familyId]);

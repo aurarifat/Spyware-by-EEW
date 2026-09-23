@@ -3,6 +3,7 @@ import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/aut
 import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { auth, googleProvider, db } from '../firebase';
 import { UserProfile, FamilyRole } from '../types/family';
+import { ensureDemoFamilySeeded } from '../services/familyService';
 
 interface AuthContextType {
   user: User | null;
@@ -58,6 +59,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (snap.exists()) {
             setProfile(snap.data() as UserProfile);
           }
+        }, (error) => {
+          console.warn('Profile onSnapshot error:', error);
         });
         setLoading(false);
         return () => unsubProfile();
@@ -102,9 +105,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: mockUser.email,
       photoURL: mockUser.photoURL,
       role,
-      familyId: null,
+      familyId: 'family_ahmed_demo',
       createdAt: Date.now()
     };
+
+    // Ensure demo family documents exist in Firestore
+    await ensureDemoFamilySeeded();
 
     // Store in Firestore users doc as well
     try {
@@ -112,7 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existing = await getDoc(userRef);
       if (existing.exists()) {
         const data = existing.data() as UserProfile;
-        mockProfile.familyId = data.familyId || null;
+        mockProfile.familyId = data.familyId || 'family_ahmed_demo';
       } else {
         await setDoc(userRef, mockProfile);
       }

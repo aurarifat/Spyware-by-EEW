@@ -101,6 +101,8 @@ export class WebRTCManager {
           }
         }
       }
+    }, (err) => {
+      console.warn('WebRTC signaling listener warning (sender):', err);
     });
   }
 
@@ -174,6 +176,8 @@ export class WebRTCManager {
           }
         }
       }
+    }, (err) => {
+      console.warn('WebRTC signaling listener warning (receiver):', err);
     });
   }
 

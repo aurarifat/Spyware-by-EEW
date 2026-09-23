@@ -42,6 +42,8 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({ familyId, guar
       if (snap.exists()) {
         setPermissionsDoc(snap.data() as MemberPermissionsDoc);
       }
+    }, (err) => {
+      console.warn('Member perms listener warning:', err);
     });
 
     // Listen to active sessions where memberId === user.uid
@@ -61,6 +63,8 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({ familyId, guar
       });
       setActiveSessions(list);
       setPendingRequests(requests);
+    }, (err) => {
+      console.warn('Member sessions listener warning:', err);
     });
 
     // Listen to audit logs for this member
@@ -75,6 +79,8 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({ familyId, guar
       });
       logs.sort((a, b) => b.timestamp - a.timestamp);
       setAuditLogs(logs);
+    }, (err) => {
+      console.warn('Member audit listener warning:', err);
     });
 
     return () => {

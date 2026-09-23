@@ -1,0 +1,168 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with display name, email, and family membership information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["guardian", "member"] },
+        "familyId": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["uid", "displayName", "email", "createdAt"]
+    },
+    "Device": {
+      "title": "Device",
+      "description": "Registered device status, telemetry, and remote hardware flags",
+      "type": "object",
+      "properties": {
+        "deviceId": { "type": "string" },
+        "userId": { "type": "string" },
+        "familyId": { "type": "string" },
+        "deviceName": { "type": "string" },
+        "platform": { "type": "string" },
+        "appVersion": { "type": "string" },
+        "lastSeen": { "type": "number" },
+        "battery": { "type": "number" },
+        "isCharging": { "type": "boolean" },
+        "onlineStatus": { "type": "boolean" },
+        "wifiSsid": { "type": "string" },
+        "flashlightOn": { "type": "boolean" }
+      },
+      "required": ["deviceId", "userId", "familyId", "deviceName", "platform", "lastSeen"]
+    },
+    "Family": {
+      "title": "Family",
+      "description": "Family group container",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string" },
+        "name": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "createdBy": { "type": "string" }
+      },
+      "required": ["familyId", "name", "createdAt", "createdBy"]
+    },
+    "FamilyMember": {
+      "title": "FamilyMember",
+      "description": "A member inside a family group",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["guardian", "member"] },
+        "joinedAt": { "type": "number" },
+        "deviceId": { "type": "string" },
+        "battery": { "type": "number" },
+        "isOnline": { "type": "boolean" }
+      },
+      "required": ["uid", "displayName", "role", "joinedAt"]
+    },
+    "MemberPermissions": {
+      "title": "MemberPermissions",
+      "description": "Granular capability consent and permission state for a member device",
+      "type": "object",
+      "properties": {
+        "familyId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "updatedAt": { "type": "number" },
+        "capabilities": { "type": "object" }
+      },
+      "required": ["familyId", "memberId", "capabilities"]
+    },
+    "AccessSession": {
+      "title": "AccessSession",
+      "description": "Active live camera or screen streaming session",
+      "type": "object",
+      "properties": {
+        "sessionId": { "type": "string" },
+        "familyId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "memberName": { "type": "string" },
+        "guardianId": { "type": "string" },
+        "guardianName": { "type": "string" },
+        "capability": { "type": "string" },
+        "deviceId": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "expiresAt": { "type": "number" }
+      },
+      "required": ["sessionId", "familyId", "memberId", "guardianId", "capability", "status", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Audit event log entry for security and transparency",
+      "type": "object",
+      "properties": {
+        "eventId": { "type": "string" },
+        "familyId": { "type": "string" },
+        "memberId": { "type": "string" },
+        "guardianId": { "type": "string" },
+        "capability": { "type": "string" },
+        "action": { "type": "string" },
+        "result": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "details": { "type": "string" }
+      },
+      "required": ["familyId", "memberId", "guardianId", "action", "result", "timestamp"]
+    },
+    "PairingCode": {
+      "title": "PairingCode",
+      "description": "Expiring 6-digit invitation pairing code",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "familyId": { "type": "string" },
+        "familyName": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "guardianName": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "expiresAt": { "type": "number" },
+        "used": { "type": "boolean" }
+      },
+      "required": ["code", "familyId", "familyName", "createdBy", "createdAt", "expiresAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles with family membership metadata"
+    },
+    "/devices/{deviceId}": {
+      "schema": "Device",
+      "description": "Registered devices and telemetry status"
+    },
+    "/families/{familyId}": {
+      "schema": "Family",
+      "description": "Family groups"
+    },
+    "/families/{familyId}/members/{memberId}": {
+      "schema": "FamilyMember",
+      "description": "Members belonging to a family"
+    },
+    "/families/{familyId}/permissions/{memberId}": {
+      "schema": "MemberPermissions",
+      "description": "Granular capability consent and guardian assignments for a member"
+    },
+    "/families/{familyId}/accessSessions/{sessionId}": {
+      "schema": "AccessSession",
+      "description": "Live camera and screen sharing sessions"
+    },
+    "/families/{familyId}/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Immutable audit events"
+    },
+    "/families/{familyId}/pairingCodes/{codeId}": {
+      "schema": "PairingCode",
+      "description": "Expiring 6-digit family pairing codes"
+    },
+    "/families/{familyId}/signaling/{signalId}": {
+      "schema": "object",
+      "description": "WebRTC offer, answer, and ICE candidate exchange"
+    }
+  }
+}

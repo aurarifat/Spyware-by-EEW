@@ -102,3 +102,87 @@ export const logAuditEvent = async (
     console.error('Failed to log audit event:', e);
   }
 };
+
+// Seed demo family if needed so simulator profiles function without missing data
+export const ensureDemoFamilySeeded = async () => {
+  try {
+    const famId = 'family_ahmed_demo';
+    const famRef = doc(db, 'families', famId);
+    const snap = await getDoc(famRef);
+    if (!snap.exists()) {
+      await setDoc(famRef, {
+        familyId: famId,
+        name: 'Ahmed Family',
+        createdAt: Date.now(),
+        createdBy: 'guardian_dad_uid'
+      });
+
+      // Add Dad as Guardian
+      await setDoc(doc(db, 'families', famId, 'members', 'guardian_dad_uid'), {
+        uid: 'guardian_dad_uid',
+        displayName: 'Dad',
+        role: 'guardian',
+        joinedAt: Date.now() - 86400000 * 30
+      });
+
+      // Add Rifat as Android Member
+      await setDoc(doc(db, 'families', famId, 'members', 'member_rifat_uid'), {
+        uid: 'member_rifat_uid',
+        displayName: 'Rifat',
+        role: 'member',
+        deviceId: 'dev_member_rifat',
+        joinedAt: Date.now() - 86400000 * 10
+      });
+
+      // Seed permissions for Rifat with Dad authorized
+      const defaultCaps: any = {
+        location: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        camera: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        screen: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        flashlight: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        callLogs: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        usage: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        photos: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+        wifi: { familyConsent: true, androidPermission: true, status: 'granted', authorizedGuardians: ['guardian_dad_uid'], createdAt: Date.now(), updatedAt: Date.now(), revokedAt: null },
+      };
+
+      await setDoc(doc(db, 'families', famId, 'permissions', 'member_rifat_uid'), {
+        familyId: famId,
+        memberUid: 'member_rifat_uid',
+        capabilities: defaultCaps,
+        updatedAt: Date.now()
+      });
+
+      // Seed device for Rifat
+      await setDoc(doc(db, 'devices', 'dev_member_rifat'), {
+        deviceId: 'dev_member_rifat',
+        userId: 'member_rifat_uid',
+        familyId: famId,
+        deviceName: "Rifat's Galaxy S24",
+        platform: 'Android 15',
+        appVersion: '2.4.0',
+        lastSeen: Date.now(),
+        battery: 76,
+        isCharging: false,
+        onlineStatus: true,
+        wifiSsid: 'Home Wi-Fi 5G',
+        flashlightOn: false
+      });
+
+      // Seed initial audit log
+      await addDoc(collection(db, 'families', famId, 'auditLogs'), {
+        familyId: famId,
+        memberId: 'member_rifat_uid',
+        guardianId: 'guardian_dad_uid',
+        capability: 'location',
+        action: 'PERMISSION_GRANTED',
+        result: 'SUCCESS',
+        timestamp: Date.now() - 3600000,
+        details: 'Member Rifat approved Location permission for Guardian Dad'
+      });
+    }
+  } catch (err) {
+    console.warn('ensureDemoFamilySeeded warning:', err);
+  }
+};
+

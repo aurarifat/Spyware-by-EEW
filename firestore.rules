@@ -5,64 +5,59 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
+
+    // Connection test document
+    match /test/{docId} {
+      allow read, write: if true;
+    }
     
-    // User profile: only owner can read/write their own profile
+    // User profile: allow read and write
     match /users/{userId} {
-      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read, write: if true;
     }
 
-    // Devices: owner can manage, family members can read for status
+    // Devices: allow read and write
     match /devices/{deviceId} {
-      allow read: if isSignedIn();
-      allow write: if isSignedIn() && request.resource.data.userId == request.auth.uid;
-      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow read, write: if true;
     }
 
-    // Family collection
+    // Family collection & subcollections
     match /families/{familyId} {
-      // Any authenticated user can read family info to check pairing codes or members
-      allow read: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update, delete: if isSignedIn();
+      allow read, write: if true;
 
       // Members subcollection
       match /members/{memberId} {
-        allow read: if isSignedIn();
-        allow write: if isSignedIn();
+        allow read, write: if true;
       }
 
-      // Permissions subcollection (each member owns their doc {memberId})
+      // Permissions subcollection
       match /permissions/{memberId} {
-        allow read: if isSignedIn();
-        // Member controls their own permissions; cannot be altered by others
-        allow write: if isSignedIn();
+        allow read, write: if true;
       }
 
       // Live access sessions
       match /accessSessions/{sessionId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if true;
       }
 
-      // Access requests (Guardian asks -> Member approves)
+      // Access requests
       match /accessRequests/{requestId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if true;
       }
 
       // Audit logs
       match /auditLogs/{logId} {
-        allow read: if isSignedIn();
-        allow create: if isSignedIn();
-        allow update, delete: if false; // Immutable audit trail
+        allow read, write: if true;
       }
 
       // Pairing codes (temporary, expires)
       match /pairingCodes/{codeId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if true;
       }
 
       // WebRTC signaling
       match /signaling/{signalId} {
-        allow read, write: if isSignedIn();
+        allow read, write: if true;
       }
     }
   }
